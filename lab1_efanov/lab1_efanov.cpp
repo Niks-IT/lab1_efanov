@@ -3,6 +3,7 @@
 #include <limits>
 #include <fstream>
 #include <iomanip>
+#include <cctype> // для std::isspace (проверка на пробелы и пустой ввод)
 
 using namespace std;
 
@@ -20,7 +21,22 @@ struct CompressorStation {
     int station_class;
 };
 
-// Функции валидации ввода
+// Функция для проверки, что строка не пустая и не состоит только из пробелов
+string getNonEmptyString(const string& prompt) {
+    string input;
+    while (true) {
+        cout << prompt;
+        getline(cin, input);
+        // Проверяем, есть ли хотя бы один непробельный символ
+        if (!input.empty() && input.find_first_not_of(' ') != string::npos) {
+            return input;
+        }
+        cout << "Ошибка! Ввод не может быть пустым. Пожалуйста, введите снова." << endl;
+    }
+}
+
+// Остальные функции
+
 int getIntegerInput(const string& prompt) {
     int value;
     cout << prompt;
@@ -74,7 +90,6 @@ bool getConfirmation(const string& prompt) {
     }
 }
 
-// Основные функции программы
 void displayMainMenu() {
     cout << "\n=== Система управления трубопроводом ===" << endl;
     cout << "1. Добавить трубу" << endl;
@@ -91,8 +106,7 @@ void displayMainMenu() {
 
 void createPipeline(Pipeline& pipe) {
     cout << "\n=== Создание трубопровода ===" << endl;
-    cout << "Введите название трубопровода: ";
-    getline(cin, pipe.name);
+    pipe.name = getNonEmptyString("Введите название трубопровода: ");
     pipe.length_km = getPositiveDouble("Введите длину трубопровода (км): ");
     pipe.diameter_mm = getPositiveInteger("Введите диаметр трубопровода (мм): ");
     pipe.under_repair = false;
@@ -101,8 +115,7 @@ void createPipeline(Pipeline& pipe) {
 
 void createStation(CompressorStation& station) {
     cout << "\n=== Создание компрессорной станции ===" << endl;
-    cout << "Введите название станции: ";
-    getline(cin, station.name);
+    station.name = getNonEmptyString("Введите название станции: ");
     station.workshop_count = getPositiveInteger("Введите общее количество цехов: ");
 
     while (true) {
@@ -170,8 +183,7 @@ void modifyPipeline(Pipeline& pipe) {
         cout << "Статус изменен: " << (pipe.under_repair ? "В ремонте" : "Работает") << endl;
         break;
     case 2:
-        cout << "Введите новое название: ";
-        getline(cin, pipe.name);
+        pipe.name = getNonEmptyString("Введите новое название: ");
         pipe.length_km = getPositiveDouble("Введите новую длину (км): ");
         pipe.diameter_mm = getPositiveInteger("Введите новый диаметр (мм): ");
         cout << "Параметры трубопровода обновлены!" << endl;
@@ -224,8 +236,7 @@ void modifyStation(CompressorStation& station) {
         }
         break;
     case 3:
-        cout << "Введите новое название: ";
-        getline(cin, station.name);
+        station.name = getNonEmptyString("Введите новое название: ");
         station.workshop_count = getPositiveInteger("Введите общее количество цехов: ");
 
         while (true) {
