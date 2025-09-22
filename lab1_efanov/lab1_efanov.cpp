@@ -3,7 +3,7 @@
 #include <limits>
 #include <fstream>
 #include <iomanip>
-#include <cctype> // для std::isspace (проверка на пробелы и пустой ввод)
+#include <cctype>
 
 using namespace std;
 
@@ -35,30 +35,76 @@ string getNonEmptyString(const string& prompt) {
     }
 }
 
-// Остальные функции
-
+// Функция для получения целого числа с валидацией пустого ввода
 int getIntegerInput(const string& prompt) {
+    string input;
     int value;
-    cout << prompt;
-    while (!(cin >> value)) {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Ошибка! Введите целое число: ";
+
+    while (true) {
+        cout << prompt;
+        getline(cin, input);
+
+        // Проверка на пустой ввод
+        if (input.empty() || input.find_first_not_of(' ') == string::npos) {
+            cout << "Ошибка! Ввод не может быть пустым. Пожалуйста, введите число: ";
+            continue;
+        }
+
+        try {
+            size_t pos;
+            value = stoi(input, &pos);
+
+            // Проверяем, что вся строка была обработана (нет лишних символов)
+            if (pos == input.size()) {
+                return value;
+            }
+            else {
+                cout << "Ошибка! Введите целое число без лишних символов: ";
+            }
+        }
+        catch (const invalid_argument&) {
+            cout << "Ошибка! Введите целое число: ";
+        }
+        catch (const out_of_range&) {
+            cout << "Ошибка! Число слишком большое. Попробуйте снова: ";
+        }
     }
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    return value;
 }
 
+// Функция для получения числа с плавающей точкой с валидацией пустого ввода
 double getDoubleInput(const string& prompt) {
+    string input;
     double value;
-    cout << prompt;
-    while (!(cin >> value)) {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << "Ошибка! Введите число: ";
+
+    while (true) {
+        cout << prompt;
+        getline(cin, input);
+
+        // Проверка на пустой ввод
+        if (input.empty() || input.find_first_not_of(' ') == string::npos) {
+            cout << "Ошибка! Ввод не может быть пустым. Пожалуйста, введите число: ";
+            continue;
+        }
+
+        try {
+            size_t pos;
+            value = stod(input, &pos);
+
+            // Проверяем, что вся строка была обработана (нет лишних символов)
+            if (pos == input.size()) {
+                return value;
+            }
+            else {
+                cout << "Ошибка! Введите число без лишних символов: ";
+            }
+        }
+        catch (const invalid_argument&) {
+            cout << "Ошибка! Введите число: ";
+        }
+        catch (const out_of_range&) {
+            cout << "Ошибка! Число слишком большое. Попробуйте снова: ";
+        }
     }
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    return value;
 }
 
 int getPositiveInteger(const string& prompt) {
@@ -84,6 +130,15 @@ bool getConfirmation(const string& prompt) {
     while (true) {
         cout << prompt << " (y/n): ";
         getline(cin, input);
+
+        // Удаляем пробелы в начале и конце
+        size_t start = input.find_first_not_of(" \t\n\r");
+        size_t end = input.find_last_not_of(" \t\n\r");
+
+        if (start != string::npos && end != string::npos) {
+            input = input.substr(start, end - start + 1);
+        }
+
         if (input == "y" || input == "Y") return true;
         if (input == "n" || input == "N") return false;
         cout << "Ошибка! Введите 'y' или 'n': ";
@@ -101,7 +156,6 @@ void displayMainMenu() {
     cout << "7. Загрузить данные" << endl;
     cout << "0. Завершение работы" << endl;
     cout << "" << endl;
-    cout << "Выберите действие: ";
 }
 
 void createPipeline(Pipeline& pipe) {
@@ -333,7 +387,24 @@ int main() {
 
     while (true) {
         displayMainMenu();
-        choice = getIntegerInput("");
+        cout << "Выберите действие: ";
+
+        string input;
+        getline(cin, input);
+
+        // Проверка на пустой ввод или пробелы
+        if (input.empty() || input.find_first_not_of(' ') == string::npos) {
+            cout << "Ошибка! Ввод не может быть пустым. Пожалуйста, выберите действие." << endl;
+            continue;
+        }
+
+        try {
+            choice = stoi(input);
+        }
+        catch (const exception&) {
+            cout << "Ошибка! Введите число от 0 до 7." << endl;
+            continue;
+        }
 
         switch (choice) {
         case 1:
@@ -361,7 +432,7 @@ int main() {
             cout << "Завершение работы программы..." << endl;
             return 0;
         default:
-            cout << "Неверный выбор. Попробуйте снова." << endl;
+            cout << "Неверный выбор. Введите число от 0 до 7." << endl;
         }
     }
 
